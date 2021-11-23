@@ -10,9 +10,9 @@ library(monocle3)
 #devtools::install_github('cole-trapnell-lab/leidenbase')
 #devtools::install_github('cole-trapnell-lab/monocle3')
 
-BiocManager::install("slingshot")
+#BiocManager::install("slingshot")
 
-baseDir = "C:/work/R/MonocleStemCells/" #path to the repo
+baseDir = "C:/work/R/MonocleStemCells/HeamatopoieticStemCells/" #path to the repo
 fig____path = paste0(baseDir, "figures/") #make sure to create this folder
 
 #All cells
@@ -188,18 +188,18 @@ rownames(metaDf2) = cmTibb2[[1]]
 
 
 #make a small test with a linear development trajectory
-library(Seurat)
+#library(Seurat)
 
-d = CreateSeuratObject(counts = t(cmDf2), project = "test", min.cells = 0, min.features = 0)
-d = NormalizeData(d, normalization.method = "LogNormalize", scale.factor = 10000)
-d = FindVariableFeatures(d, selection.method = "vst", nfeatures = 2000)
-d = ScaleData(d)
-d = RunPCA(d, features = VariableFeatures(object = d))
-d = FindNeighbors(d, dims = 1:10)
-d = FindClusters(d, resolution = 0.5)
-d <- RunUMAP(d, dims = 1:10)
-DimPlot(d, reduction = "umap")
-FeaturePlot(d, "CD38 (Ab)")
+#d = CreateSeuratObject(counts = t(cmDf2), project = "test", min.cells = 0, min.features = 0)
+#d = NormalizeData(d, normalization.method = "LogNormalize", scale.factor = 10000)
+#d = FindVariableFeatures(d, selection.method = "vst", nfeatures = 2000)
+#d = ScaleData(d)
+#d = RunPCA(d, features = VariableFeatures(object = d))
+#d = FindNeighbors(d, dims = 1:10)
+#d = FindClusters(d, resolution = 0.5)
+#d <- RunUMAP(d, dims = 1:10)
+#DimPlot(d, reduction = "umap")
+#FeaturePlot(d, "CD38 (Ab)")
 #Hmm, this is not batch corrected....
 
 
@@ -264,14 +264,40 @@ for(windowStart in 1:ncol(expr)) {
 
 colnames(cmDf2Filt)
 #"CD38 (Ab)" 1-51 are Ab, 30 is CD38
-which(colnames(cmDf2Filt) == "CD38")
-plot(cdProdVals, exprCPM[30,])
-plot(cdProdVals, exprCPM[colnames(cmDf2Filt) == "CD38",])
-plot(cdProdVals, exprCPM[1,]) #nice
-plot(cdProdVals, exprCPM[2,]) #perhaps
-plot(cdProdVals, exprCPM[3,]) #perhaps
-plot(cdProdVals, exprCPM[4,]) #perhaps
-plot(cdProdVals, exprCPM[12,]) #perhaps
+#which(colnames(cmDf2Filt) == "CD38")
+#plot(cdProdVals, exprCPM[30,])
+#plot(cdProdVals, exprCPM[colnames(cmDf2Filt) == "CD38",])
+#plot(cdProdVals, exprCPM[1,]) #nice
+#plot(cdProdVals, exprCPM[2,]) #perhaps
+#plot(cdProdVals, exprCPM[3,]) #perhaps
+#plot(cdProdVals, exprCPM[4,]) #perhaps
+#plot(cdProdVals, exprCPM[12,]) #perhaps
+
+
+plotFacetWrap = function(indices) {
+  numGenes = length(indices)
+  dd = rep(NA, numWindows*length(indices))
+  for (i in 1:numGenes) {
+    offs = numWindows*(i-1)
+    dd[(offs+1):(offs + numWindows)] = exprCPM[indices[i],]
+  }
+  
+  fac = factor(rep(indices, each=numWindows), indices, colnames(cmDf2Filt)[indices])
+  x = rep(cdProdVals, numGenes)
+  
+  
+  df = tibble(x = x, y = dd, gene=fac)
+  
+  p <- ggplot(df, aes(x=x, y=y, )) + geom_line() + facet_wrap(vars(gene), scales="free")
+  
+  return(p)  
+  
+}
+
+
+
+
+
 
 #plot all Ab using a facet grid in ggplot ( gene 1-51)
 numGenes = 51
@@ -290,12 +316,60 @@ df = tibble(x = x, y = dd, gene=fac)
 p <- ggplot(df, aes(x=x, y=y, )) + geom_line() + facet_wrap(vars(gene), scales="free")
 p
 
+p1_51 = plotFacetWrap(1:51)
 ggsave(
-  paste0(fig____path, "FWAllAbScalProd.png"),
-  plot = p,
+  paste0(fig____path, "FW_1_51.png"),
+  plot = p1_51,
   width = 14, height = 12, dpi = 300)
 
-colnames(metaDf2)
+p52_100 = plotFacetWrap(52:100)
+ggsave(
+  paste0(fig____path, "FW_52_100.png"),
+  plot = p52_100,
+  width = 14, height = 12, dpi = 300)
+
+p101_200 = plotFacetWrap(101:200)
+ggsave(
+  paste0(fig____path, "FW_101_200.png"),
+  plot = p101_200,
+  width = 14, height = 20, dpi = 300)
+
+p201_300 = plotFacetWrap(201:300)
+ggsave(
+  paste0(fig____path, "FW_201_300.png"),
+  plot = p201_300,
+  width = 14, height = 20, dpi = 300)
+
+p301_400 = plotFacetWrap(301:400)
+ggsave(
+  paste0(fig____path, "FW_301_400.png"),
+  plot = p301_400,
+  width = 14, height = 20, dpi = 300)
+
+p401_500 = plotFacetWrap(401:500)
+ggsave(
+  paste0(fig____path, "FW_401_500.png"),
+  plot = p401_500,
+  width = 14, height = 20, dpi = 300)
+
+p501_600 = plotFacetWrap(501:600)
+ggsave(
+  paste0(fig____path, "FW_501_600.png"),
+  plot = p501_600,
+  width = 14, height = 20, dpi = 300)
+
+p601_648 = plotFacetWrap(601:648)
+ggsave(
+  paste0(fig____path, "FW_601_648.png"),
+  plot = p601_648,
+  width = 14, height = 20, dpi = 300)
+
+
+
+
+
+print(colnames(metaDf2)[500:length(metaDf2)],max.print=2000)
+#UMAP_X_TZ8V is the one I should use!
 
 #Seurat_Clusters_CDOJ
 #Seurat_Clusters_C3N0
